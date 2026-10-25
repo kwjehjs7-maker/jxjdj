@@ -32,20 +32,44 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Run statistics unit tests
+        id: tests
         working-directory: artifacts/so2-match-tracker/android
-        run: ./gradlew --no-daemon :app:testDebugUnitTest
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon :app:testDebugUnitTest 2>&1 | tee "$RUNNER_TEMP/so2-unit-tests.log"
 
       - name: Build debug APK
+        id: apk
         working-directory: artifacts/so2-match-tracker/android
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon :app:assembleDebug
+          set -o pipefail
+          ./gradlew --no-daemon :app:assembleDebug 2>&1 | tee "$RUNNER_TEMP/so2-apk-build.log"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: always() && steps.apk.outcome == 'success'
         with:
           name: SO2-Match-Tracker-APK
           path: artifacts/so2-match-tracker/android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Publish Gradle diagnostics
+        if: always()
+        run: |
+          for log in "$RUNNER_TEMP/so2-unit-tests.log" "$RUNNER_TEMP/so2-apk-build.log"; do
+            if [ -f "$log" ]; then
+              {
+                printf '### %s\n\n```\n' "$(basename "$log")"
+                tail -n 160 "$log"
+                printf '\n```\n\n'
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Mark failed unit tests
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
           
