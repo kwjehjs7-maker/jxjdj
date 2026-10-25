@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/so2-match-tracker/"
+title = "SO2 Match Tracker"
+description = "Личный мобильный дневник матчей Standoff 2: быстрая запись результатов, локальная статистика, история, аналитика и резервные копии без аккаунта и сервера."
+version = "1.0.0"
+id = "artifacts/so2-match-tracker"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/so2-match-tracker/" ]
+localPort = 18603
+
+[services.development]
+run = "pnpm --filter @workspace/so2-match-tracker run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/so2-match-tracker", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/so2-match-tracker", "run", "serve" ]
+
+[services.env]
+PORT = "18603"
+BASE_PATH = "/so2-match-tracker/"

@@ -1,45 +1,48 @@
-# [Project name]
+# SO2 Match Tracker
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Нативный Android-дневник матчей Standoff 2 с локальным хранением, статистикой и резервными копиями.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/so2-match-tracker run dev` — run the Replit project-information preview
+- `pnpm run typecheck` — check the workspace TypeScript packages
+- `cd artifacts/so2-match-tracker/android && ./gradlew :app:assembleDebug` — build the Android APK on a computer with JDK 17 and Android SDK 36
+- Android-specific setup, build, and installation instructions are in `artifacts/so2-match-tracker/android/README.md`
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Android: Kotlin, Jetpack Compose, Room
+- Minimum Android version: Android 14 (API 34); target SDK: Android 16 (API 36)
+- Replit project shell: pnpm workspace; the Expo artifact preview is informational and is not the native Android app
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/so2-match-tracker/android/` — complete native Android source project
+- `artifacts/so2-match-tracker/android/app/src/main/java/com/so2matchtracker/data/` — Room entity, DAO, database, and JSON backup validation
+- `artifacts/so2-match-tracker/android/app/src/main/java/com/so2matchtracker/domain/` — match categories and statistics calculations
+- `artifacts/so2-match-tracker/android/app/src/main/java/com/so2matchtracker/ui/` — Compose screens for entry, history, analytics, and backup
+- `artifacts/so2-match-tracker/android/README.md` — build and sideload instructions
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Match records stay on-device in Room; the app does not require an API, account, or network permission.
+- Imports validate the whole JSON file before insertion and only add IDs that are not already stored.
+- Room's destructive migration fallback is intentionally disabled; future schema changes must use explicit migrations.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Record match outcomes and K/D inputs quickly, then review history, aggregate statistics, category frequencies, and period-based trends.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep the app in Russian, local-only, and focused on quick personal match analysis.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Replit container has no Java/JDK or Android SDK, so an APK and on-device installation test cannot be produced here.
+- The Replit preview is an informational screen; native Compose UI is only available after building and running the Android project.
+- Preserve Room data with explicit migrations when the database schema changes.
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `artifacts/so2-match-tracker/android/README.md` for the exact APK build steps and current verification limits.
